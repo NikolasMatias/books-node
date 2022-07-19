@@ -1,0 +1,20 @@
+{
+  "name": "books-node",
+  "version": "1.0.0",
+  "description": "This is a project in pure node js",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NikolasMatias/books-node.git"
+  },
+  "author": "Nikolas Matias",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/NikolasMatias/books-node/issues"
+  },
+  "homepage": "https://github.com/NikolasMatias/books-node#readme"
+}
