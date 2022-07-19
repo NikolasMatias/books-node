@@ -18,7 +18,7 @@ export default function env(target, defaultTarget) {
                 return previousValue;
             }, {});
 
-            resolve(formattedData[target] || defaultTarget);
+            resolve(formattedData[target] || process.env[target] || defaultTarget);
         } catch (e) {
             if (defaultTarget) resolve(defaultTarget);
 
