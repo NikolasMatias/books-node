@@ -38,9 +38,6 @@ export default class Server {
         try {
             const pathName = path.join(process.cwd(), request.url);
 
-            console.log(request.url);
-            console.log(request.method);
-
             if (this.#hasExtension(pathName)) {
                 this.#fileHandler.verifyExistAndReadable(pathName)
                     .then(() => {

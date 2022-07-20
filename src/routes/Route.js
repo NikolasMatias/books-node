@@ -64,7 +64,6 @@ export default class Route {
                 const route = routesFound[0];
                 const returnCallback = route.getCallback();
                 const returnValue = returnCallback();
-                // route.deleteHeader('Request Method');
                 const headers = { 'Content-Type':  route.getHeader('Content-Type')};
 
                 if (route.getHeader('Content-Type').includes(this.constants.HTML)) {
@@ -82,7 +81,14 @@ export default class Route {
                 }
 
                 if (route.getHeader('Content-Type').includes(this.constants.JSON)) {
+                    const content = returnValue;
+                    const statusCode = 200;
+                    const typeContent = 'binary';
 
+                    return {
+                        headers, content,
+                        typeContent, statusCode
+                    }
                 }
 
             } else {
