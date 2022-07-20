@@ -83,7 +83,7 @@ export default class Route {
                 if (route.getHeader('Content-Type').includes(this.constants.JSON)) {
                     const content = returnValue;
                     const statusCode = 200;
-                    const typeContent = 'binary';
+                    const typeContent = 'utf-8';
 
                     return {
                         headers, content,
