@@ -1,5 +1,9 @@
 import Server from './src/routes/Server.js'
+import Route from "./src/routes/Route.js";
 
-(new Server()).listen(() => {
-    console.log('passando aqui');
-});
+const routes = new Route();
+
+routes.get('/', 'HTML', () => '/src/views/Home.html');
+
+const server = new Server(routes);
+server.listen();

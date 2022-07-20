@@ -6,14 +6,16 @@ import FileHandler from "../helpers/FileHandler.js";
 import env from "../helpers/env.js";
 
 export default class Server {
-    constructor() {
-        // this.routes = routes;
+    constructor(route = null) {
         this.#fileHandler = new FileHandler();
+        this.#routes = route;
+
         this.#http = http.createServer(this.#startServer.bind(this));
     }
 
     #http
     #fileHandler
+    #routes
 
     #contentTypesByExtension = {
         '.html': "text/html",
@@ -32,27 +34,57 @@ export default class Server {
         })
     }
 
-    #startServer(request, response) {
-        const pathName = path.join(process.cwd(), request.url);
+    async #startServer(request, response) {
+        try {
+            const pathName = path.join(process.cwd(), request.url);
 
-        if (this.#hasExtension(pathName)) {
-            this.#fileHandler.verifyExistAndReadable(pathName)
-                .then(() => {
-                    fs.readFile(pathName, 'binary', (err, file) => {
-                        this.#handleIfHasError(response, err)
-                            .then(() => {
-                                response.writeHead(200, { "Content-Type": this.#contentTypesByExtension[path.extname(pathName)] });
-                                response.write(file, 'binary');
-                                response.end();
-                            });
+            console.log(request.url);
+            console.log(request.method);
+
+            if (this.#hasExtension(pathName)) {
+                this.#fileHandler.verifyExistAndReadable(pathName)
+                    .then(() => {
+                        fs.readFile(pathName, 'binary', (err, file) => {
+                            this.#handleIfHasError(response, err)
+                                .then(() => {
+                                    response.writeHead(200, { "Content-Type": this.#contentTypesByExtension[path.extname(pathName)] });
+                                    response.write(file, 'binary');
+                                    response.end();
+                                });
+                        })
                     })
-                })
-                .catch( async () => {
-                    this.#handleNotFound(response);
-                });
-        } else {
-            this.#handleNotFound(response);
+                    .catch( async () => {
+                        await this.#handleNotFound(response);
+                    });
+            } else {
+                if (this.#routes !== null) {
+                    const {
+                        headers, content,
+                        typeContent, statusCode
+                    } = await this.#routes.runRoute(request.url, request.method);
+
+                    response.writeHead(statusCode, headers);
+                    response.write(content, typeContent);
+                    response.end();
+                } else {
+                    await this.#handleNotFound(response);
+                }
+            }
+        } catch (error) {
+            this.isJSON(error.message).then(async ({ statusCode }) => {
+                if (statusCode === 404) {
+                    await this.#handleNotFound(response);
+                } else {
+                    await this.#handleIfHasError(response, error);
+                }
+            }).catch(async () => {
+                await this.#handleIfHasError(response, error);
+            })
         }
+    }
+
+    async isJSON(json) {
+        return JSON.parse(json);
     }
 
     async #handleIfHasError(response, error = null) {
@@ -105,6 +137,14 @@ export default class Server {
                 response.write("404 Not Found\n");
                 response.end();
             })
+    }
+
+    getRoutes() {
+        return this.#routes;
+    }
+
+    setRoutes(routes) {
+        this.#routes = routes;
     }
 
     #hasExtension(filename) {
