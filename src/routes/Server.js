@@ -8,8 +8,12 @@ import env from "../helpers/env.js";
 export default class Server {
     constructor() {
         // this.routes = routes;
-        this.http = http.createServer(this.#startServer.bind(this));
+        this.#fileHandler = new FileHandler();
+        this.#http = http.createServer(this.#startServer.bind(this));
     }
+
+    #http
+    #fileHandler
 
     #contentTypesByExtension = {
         '.html': "text/html",
@@ -21,7 +25,7 @@ export default class Server {
         const hostname = await env('HTTP_HOST', '127.0.0.1');
         const port = await env('HTTP_PORT', '3000');
 
-        return this.http.listen(port, hostname, () => {
+        return this.#http.listen(port, hostname, () => {
             console.log(`Server running at http://${hostname}:${port}/`);
 
             if (typeof callback === 'function' || callback instanceof Function) callback();
@@ -32,7 +36,7 @@ export default class Server {
         const pathName = path.join(process.cwd(), request.url);
 
         if (this.#hasExtension(pathName)) {
-            (new FileHandler).verifyExistAndReadable(pathName)
+            this.#fileHandler.verifyExistAndReadable(pathName)
                 .then(() => {
                     fs.readFile(pathName, 'binary', (err, file) => {
                         this.#handleIfHasError(response, err)
@@ -53,8 +57,8 @@ export default class Server {
 
     async #handleIfHasError(response, error = null) {
         if (error !== null) {
-            const pathName505 = path.join(process.cwd(), await env('URL_500', '/public/view/500.html'));
-            (new FileHandler).verifyExistAndReadable(pathName505)
+            const pathName505 = path.join(process.cwd(), await env('URL_500', '/public/views/500.html'));
+            this.#fileHandler.verifyExistAndReadable(pathName505)
                 .then(() => {
                     fs.readFile(pathName505, 'binary', (err, file) => {
                         if (err !== null) {
@@ -81,8 +85,8 @@ export default class Server {
     }
 
     async #handleNotFound(response) {
-        const pathName404 = path.join(process.cwd(), await env('URL_404', '/public/view/404.html'));
-        (new FileHandler).verifyExistAndReadable(pathName404)
+        const pathName404 = path.join(process.cwd(), await env('URL_404', '/public/views/404.html'));
+        this.#fileHandler.verifyExistAndReadable(pathName404)
             .then(() => {
                 fs.readFile(pathName404, 'binary', (err, file) => {
                     if (err !== null) {
