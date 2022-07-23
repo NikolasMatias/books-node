@@ -1,5 +1,5 @@
 import fs from 'fs';
-import FileHandler from "../helpers/FileHandler.js";
+import FileHandler from "../../helpers/FileHandler.js";
 import Route from "./data/Route.js";
 import * as path from "path";
 

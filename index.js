@@ -1,4 +1,4 @@
-import Server from './src/routes/Server.js'
+import Server from './src/core/routes/Server.js'
 
 const server = new Server();
 

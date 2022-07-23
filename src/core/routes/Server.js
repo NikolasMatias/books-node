@@ -2,8 +2,8 @@ import * as http from 'http';
 import * as url from 'url';
 import * as path from "path";
 import * as fs from "fs";
-import FileHandler from "../helpers/FileHandler.js";
-import env from "../helpers/env.js";
+import FileHandler from "../../helpers/FileHandler.js";
+import env from "../../helpers/env.js";
 import RouteManagement from "./RouteManagement.js";
 
 export default class Server {
