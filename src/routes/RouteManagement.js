@@ -1,61 +1,62 @@
 import fs from 'fs';
 import FileHandler from "../helpers/FileHandler.js";
-import RouteData from "./data/RouteData.js";
+import Route from "./data/Route.js";
 import * as path from "path";
 
-export default class Route {
+export default class RouteManagement {
     #routes
     #fileHeader
+    constants
 
     constructor() {
         this.#routes = [];
         this.#fileHeader = new FileHandler();
-    }
 
-    constants = {
-        HTML: 'text/html',
-        JSON: 'application/json'
+        this.constants = {
+            HTML: 'text/html',
+            JSON: 'application/json'
+        }
     }
 
     get(pathName, typeReturn, cbReturn) {
-        let routeData = new RouteData(pathName);
-        routeData.setHeader('Content-Type', this.constants[typeReturn]);
-        routeData.setHeader('Request Method', 'GET');
-        routeData.setCallback(cbReturn);
+        const route = new Route(pathName);
+        route.setHeader('Content-Type', this.constants[typeReturn]);
+        route.setHeader('Request Method', 'GET');
+        route.setCallback(cbReturn);
 
-        this.#routes.push(routeData);
+        this.#routes.push(route);
     }
 
     post(pathName, typeReturn, cbReturn) {
-        let routeData = new RouteData(pathName);
-        routeData.setHeader('Content-Type', this.constants[typeReturn]);
-        routeData.setHeader('Request Method', 'POST');
-        routeData.setCallback(cbReturn);
+        const route = new Route(pathName);
+        route.setHeader('Content-Type', this.constants[typeReturn]);
+        route.setHeader('Request Method', 'POST');
+        route.setCallback(cbReturn);
 
-        this.#routes.push(routeData);
+        this.#routes.push(route);
     }
 
     put(pathName, typeReturn, cbReturn) {
-        let routeData = new RouteData(pathName);
-        routeData.setHeader('Content-Type', this.constants[typeReturn]);
-        routeData.setHeader('Request Method', 'PUT');
-        routeData.setCallback(cbReturn);
+        const route = new Route(pathName);
+        route.setHeader('Content-Type', this.constants[typeReturn]);
+        route.setHeader('Request Method', 'PUT');
+        route.setCallback(cbReturn);
 
-        this.#routes.push(routeData);
+        this.#routes.push(route);
     }
 
     delete(pathName, typeReturn, cbReturn) {
-        let routeData = new RouteData(pathName);
-        routeData.setHeader('Content-Type', this.constants[typeReturn]);
-        routeData.setHeader('Request Method', 'DELETE');
-        routeData.setCallback(cbReturn);
+        const route = new Route(pathName);
+        route.setHeader('Content-Type', this.constants[typeReturn]);
+        route.setHeader('Request Method', 'DELETE');
+        route.setCallback(cbReturn);
 
-        this.#routes.push(routeData);
+        this.#routes.push(route);
     }
 
     async runRoute(pathName, method) {
         try {
-            let routesFound = this.#routes.filter(route => {
+            const routesFound = this.#routes.filter(route => {
                 return route.hasHeaderValue('Request Method', method)
                     && route.hasPathName(pathName);
             });
@@ -81,7 +82,7 @@ export default class Route {
                 }
 
                 if (route.getHeader('Content-Type').includes(this.constants.JSON)) {
-                    const content = returnValue;
+                    const content = JSON.stringify(returnValue);
                     const statusCode = 200;
                     const typeContent = 'utf-8';
 
@@ -100,5 +101,17 @@ export default class Route {
         } catch (error) {
             throw error;
         }
+    }
+
+    getRoutes() {
+        return this.#routes;
+    }
+
+    setRoutes(routes) {
+        this.#routes = routes;
+    }
+
+    concatRoutes(routes) {
+        this.#routes = [...this.#routes, ...routes.getRoutes()];
     }
 }

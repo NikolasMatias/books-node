@@ -1,4 +1,4 @@
-export default class RouteData {
+export default class Route {
     constructor(pathName, headers = {}) {
         this.#headers = headers;
         this.#pathName = pathName;

@@ -4,18 +4,19 @@ import * as path from "path";
 import * as fs from "fs";
 import FileHandler from "../helpers/FileHandler.js";
 import env from "../helpers/env.js";
+import RouteManagement from "./RouteManagement.js";
 
 export default class Server {
-    constructor(route = null) {
+    constructor(routeManagement = null) {
         this.#fileHandler = new FileHandler();
-        this.#routes = route;
+        this.#routeManagement = routeManagement !== null ? routeManagement : (new RouteManagement());
 
         this.#http = http.createServer(this.#startServer.bind(this));
     }
 
     #http
     #fileHandler
-    #routes
+    #routeManagement
 
     #contentTypesByExtension = {
         '.html': "text/html",
@@ -32,6 +33,38 @@ export default class Server {
 
             if (typeof callback === 'function' || callback instanceof Function) callback();
         })
+    }
+
+    getView(pathName, cbReturn) {
+        this.#routeManagement.get(pathName, 'HTML', cbReturn);
+    }
+
+    postView(pathName, cbReturn) {
+        this.#routeManagement.post(pathName, 'HTML', cbReturn);
+    }
+
+    putView(pathName, cbReturn) {
+        this.#routeManagement.put(pathName, 'HTML', cbReturn);
+    }
+
+    deleteView(pathName, cbReturn) {
+        this.#routeManagement.delete(pathName, 'HTML', cbReturn);
+    }
+
+    getJson(pathName, cbReturn) {
+        this.#routeManagement.get(pathName, 'JSON', cbReturn);
+    }
+
+    postJson(pathName, cbReturn) {
+        this.#routeManagement.post(pathName, 'JSON', cbReturn);
+    }
+
+    putJson(pathName, cbReturn) {
+        this.#routeManagement.put(pathName, 'JSON', cbReturn);
+    }
+
+    deleteJson(pathName, cbReturn) {
+        this.#routeManagement.delete(pathName, 'JSON', cbReturn);
     }
 
     async #startServer(request, response) {
@@ -54,11 +87,11 @@ export default class Server {
                         await this.#handleNotFound(response);
                     });
             } else {
-                if (this.#routes !== null) {
+                if (this.#routeManagement !== null) {
                     const {
                         headers, content,
                         typeContent, statusCode
-                    } = await this.#routes.runRoute(request.url, request.method);
+                    } = await this.#routeManagement.runRoute(request.url, request.method);
 
                     response.writeHead(statusCode, headers);
                     response.write(content, typeContent);
@@ -72,10 +105,10 @@ export default class Server {
                 if (statusCode === 404) {
                     await this.#handleNotFound(response);
                 } else {
-                    await this.#handleIfHasError(response, error);
+                    await this.#handleIfHasError(response, error, false);
                 }
             }).catch(async () => {
-                await this.#handleIfHasError(response, error);
+                await this.#handleIfHasError(response, error, false);
             })
         }
     }
@@ -84,7 +117,7 @@ export default class Server {
         return JSON.parse(json);
     }
 
-    async #handleIfHasError(response, error = null) {
+    async #handleIfHasError(response, error = null, hasThrow = true) {
         if (error !== null) {
             const pathName505 = path.join(process.cwd(), await env('URL_500', '/public/views/500.html'));
             this.#fileHandler.verifyExistAndReadable(pathName505)
@@ -107,7 +140,10 @@ export default class Server {
                     response.end();
                 });
 
-            throw new Error(error);
+            if (hasThrow) throw new Error(error);
+            console.error(error);
+
+            return true;
         } else {
             return true;
         }
@@ -136,12 +172,12 @@ export default class Server {
             })
     }
 
-    getRoutes() {
-        return this.#routes;
+    getRouteManagement() {
+        return this.#routeManagement;
     }
 
-    setRoutes(routes) {
-        this.#routes = routes;
+    setRouteManagement(routeManagement) {
+        this.#routeManagement = routeManagement;
     }
 
     #hasExtension(filename) {
