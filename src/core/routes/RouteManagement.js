@@ -54,6 +54,38 @@ export default class RouteManagement {
         this.#routes.push(route);
     }
 
+    getView(pathName, cbReturn) {
+        this.get(pathName, 'HTML', cbReturn);
+    }
+
+    postView(pathName, cbReturn) {
+        this.post(pathName, 'HTML', cbReturn);
+    }
+
+    putView(pathName, cbReturn) {
+        this.put(pathName, 'HTML', cbReturn);
+    }
+
+    deleteView(pathName, cbReturn) {
+        this.delete(pathName, 'HTML', cbReturn);
+    }
+
+    getJson(pathName, cbReturn) {
+        this.get(pathName, 'JSON', cbReturn);
+    }
+
+    postJson(pathName, cbReturn) {
+        this.post(pathName, 'JSON', cbReturn);
+    }
+
+    putJson(pathName, cbReturn) {
+        this.put(pathName, 'JSON', cbReturn);
+    }
+
+    deleteJson(pathName, cbReturn) {
+        this.delete(pathName, 'JSON', cbReturn);
+    }
+
     async runRoute(pathName, method) {
         try {
             const routesFound = this.#routes.filter(route => {
@@ -112,6 +144,10 @@ export default class RouteManagement {
     }
 
     concatRoutes(routes) {
-        this.#routes = [...this.#routes, ...routes.getRoutes()];
+        if (typeof routes === 'function') {
+            routes = routes.call();
+        }
+
+        this.#routes = this.#routes.concat(routes.getRoutes());
     }
 }

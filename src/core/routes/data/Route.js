@@ -25,7 +25,7 @@ export default class Route {
     }
 
     hasPathName(pathName) {
-        return this.#pathName.includes(pathName);
+        return this.#pathName === pathName;
     }
 
     getHeaders() {

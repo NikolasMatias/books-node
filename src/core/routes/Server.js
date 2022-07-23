@@ -1,5 +1,4 @@
 import * as http from 'http';
-import * as url from 'url';
 import * as path from "path";
 import * as fs from "fs";
 import FileHandler from "../../helpers/FileHandler.js";
@@ -178,6 +177,16 @@ export default class Server {
 
     setRouteManagement(routeManagement) {
         this.#routeManagement = routeManagement;
+    }
+
+    concatRoutes(routes) {
+        if (typeof routes === 'function') {
+            routes = routes.call();
+        }
+
+        this.#routeManagement.concatRoutes(routes);
+
+        return this;
     }
 
     #hasExtension(filename) {
