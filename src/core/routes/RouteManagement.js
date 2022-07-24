@@ -109,51 +109,65 @@ export default class RouteManagement {
 
     async runRoute(pathName, method) {
         try {
-            const routesFound = this.#routes.filter(route => {
-                return route.hasHeaderValue('Request Method', method)
-                    && route.hasPathName(pathName);
-            });
+            const route = this.getRoute(pathName, method);
 
-            if (routesFound.length > 0) {
-                const route = routesFound[0];
-                const returnCallback = route.getCallback();
-                const returnValue = returnCallback();
-                const headers = { 'Content-Type':  route.getHeader('Content-Type')};
+            const returnCallback = route.getCallback();
+            const returnValue = returnCallback();
+            const headers = { 'Content-Type':  route.getHeader('Content-Type')};
 
-                if (route.getHeader('Content-Type').includes(this.constants.HTML)) {
-                    const fullPath = path.join(process.cwd(), returnValue);
-                    const typeContent = 'binary';
-                    await this.#fileHeader.verifyExistAndReadable(fullPath);
+            if (route.getHeader('Content-Type').includes(this.constants.HTML)) {
+                const fullPath = path.join(process.cwd(), returnValue);
+                const typeContent = 'binary';
+                await this.#fileHeader.verifyExistAndReadable(fullPath);
 
-                    const content = await fs.promises.readFile(fullPath, typeContent);
-                    const statusCode = 200;
+                const content = await fs.promises.readFile(fullPath, typeContent);
+                const statusCode = 200;
 
-                    return {
-                        headers, content,
-                        typeContent, statusCode
-                    }
+                return {
+                    headers, content,
+                    typeContent, statusCode
                 }
+            }
 
-                if (route.getHeader('Content-Type').includes(this.constants.JSON)) {
-                    const content = JSON.stringify(returnValue);
-                    const statusCode = 200;
-                    const typeContent = 'utf-8';
+            if (route.getHeader('Content-Type').includes(this.constants.JSON)) {
+                const content = JSON.stringify(returnValue);
+                const statusCode = 200;
+                const typeContent = 'utf-8';
 
-                    return {
-                        headers, content,
-                        typeContent, statusCode
-                    }
+                return {
+                    headers, content,
+                    typeContent, statusCode
                 }
-
-            } else {
-                throw new Error(JSON.stringify({
-                    message: 'Route Not Found',
-                    statusCode: 404
-                }));
             }
         } catch (error) {
-            throw error;
+            if (typeof error.message === 'string' && error.message.includes('You have to implement the method')) {
+                const route = this.getRoute(pathName, method);
+
+                throw new Error(JSON.stringify({
+                    message: error.message,
+                    statusCode: 404,
+                    typeContent: route.getHeader('Content-Type').includes(this.constants.HTML) ? 'binary' : 'utf-8'
+                }));
+            } else {
+                throw error;
+            }
         }
+    }
+
+    getRoute(pathName, method) {
+        const routesFound = this.#routes.filter(route => {
+            return route.hasHeaderValue('Request Method', method)
+                && route.hasPathName(pathName);
+        });
+
+        if (routesFound.length > 0) {
+            return routesFound[0];
+        }
+
+        throw new Error(JSON.stringify({
+            message: 'Route Not Found',
+            statusCode: 404
+        }));
     }
 
     getRoutes() {

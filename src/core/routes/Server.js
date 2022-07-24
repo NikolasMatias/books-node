@@ -100,9 +100,9 @@ export default class Server {
                 }
             }
         } catch (error) {
-            this.isJSON(error.message).then(async ({ statusCode }) => {
+            this.isJSON(error.message).then(async ({ statusCode, typeContent }) => {
                 if (statusCode === 404) {
-                    await this.#handleNotFound(response);
+                    await this.#handleNotFound(response, typeContent);
                 } else {
                     await this.#handleIfHasError(response, error, false);
                 }
@@ -148,27 +148,40 @@ export default class Server {
         }
     }
 
-    async #handleNotFound(response) {
-        const pathName404 = path.join(process.cwd(), await env('URL_404', '/public/views/404.html'));
-        this.#fileHandler.verifyExistAndReadable(pathName404)
-            .then(() => {
-                fs.readFile(pathName404, 'binary', (err, file) => {
-                    if (err !== null) {
-                        response.writeHead(500, {"Content-Type": "text/plain"});
-                        response.write(err + "\n");
+    async #handleNotFound(response, typeContent = 'binary') {
+        switch (typeContent) {
+            case 'utf-8':
+                response.writeHead(404, { 'Content-Type': 'application/json' });
+                response.write(JSON.stringify({ message: 'Not Found', statusCode: 404 }), typeContent);
+                response.end();
+                break;
+            case 'binary':
+                const pathName404 = path.join(process.cwd(), await env('URL_404', '/public/views/404.html'));
+                this.#fileHandler.verifyExistAndReadable(pathName404)
+                    .then(() => {
+                        fs.readFile(pathName404, 'binary', (err, file) => {
+                            if (err !== null) {
+                                response.writeHead(500, {"Content-Type": "text/plain"});
+                                response.write(err + "\n");
+                                response.end();
+                            } else {
+                                response.writeHead(404, { "Content-Type": this.#contentTypesByExtension[path.extname(pathName404)] });
+                                response.write(file, 'binary');
+                                response.end();
+                            }
+                        })
+                    })
+                    .catch(() => {
+                        response.writeHead(404, { 'Content-Type': 'text/plain' });
+                        response.write("404 Not Found\n");
                         response.end();
-                    } else {
-                        response.writeHead(404, { "Content-Type": this.#contentTypesByExtension[path.extname(pathName404)] });
-                        response.write(file, 'binary');
-                        response.end();
-                    }
-                })
-            })
-            .catch(() => {
+                    });
+                break;
+            default:
                 response.writeHead(404, { 'Content-Type': 'text/plain' });
                 response.write("404 Not Found\n");
                 response.end();
-            })
+        }
     }
 
     getRouteManagement() {
