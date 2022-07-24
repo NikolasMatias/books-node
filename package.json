@@ -6,7 +6,8 @@
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node --experimental-json-modules index.js"
+    "start": "node --experimental-json-modules index.js",
+    "dev": "node --experimental-json-modules --trace-warnings index.js"
   },
   "repository": {
     "type": "git",
@@ -17,5 +18,8 @@
   "bugs": {
     "url": "https://github.com/NikolasMatias/books-node/issues"
   },
-  "homepage": "https://github.com/NikolasMatias/books-node#readme"
+  "homepage": "https://github.com/NikolasMatias/books-node#readme",
+  "dependencies": {
+    "formidable": "^2.0.1"
+  }
 }

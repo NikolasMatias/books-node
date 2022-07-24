@@ -1,7 +1,8 @@
 import fs from "fs";
+import path from "path";
 
 export default class FileHandler {
-    async verifyExistAndReadable(fileName) {
+    static async verifyExistAndReadable(fileName) {
         return new Promise((resolve, reject) => {
             fs.access(fileName, fs.constants.F_OK | fs.constants.R_OK, (err) => {
                 if (err) reject({
@@ -12,5 +13,9 @@ export default class FileHandler {
                 resolve(true);
             });
         });
+    }
+
+    static hasExtension(filename) {
+        return path.extname(filename).length > 0;
     }
 }

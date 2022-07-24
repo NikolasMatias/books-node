@@ -7,7 +7,17 @@ export default class BookController extends AbstractController
         super(true);
     }
 
-    index() {
+    index(request) {
+        const search = request.get('search');
+
+        if (search) {
+            return books.filter(book => book.title.includes(search));
+        }
+
         return books;
+    }
+
+    store(request) {
+        return request.get('autor');
     }
 }

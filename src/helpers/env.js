@@ -6,7 +6,7 @@ export default function env(target, defaultTarget) {
         const envFile = '/mnt/c/Users/nikol/OneDrive/Documentos/Projetos/Estudos/node-studies/books-node/.env';
 
         try {
-            await (new FileHandler).verifyExistAndReadable(envFile);
+            await FileHandler.verifyExistAndReadable(envFile);
 
             const data = await fs.promises.readFile(envFile, "utf-8");
             const formattedData = data.split(/\r?\n/).reduce((previousValue, currentValue) => {

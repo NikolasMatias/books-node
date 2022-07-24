@@ -5,23 +5,23 @@ export default class AbstractController {
         }
     }
 
-    index() {
+    index(request) {
         throw new Error('You have to implement the method index!');
     }
 
-    store() {
+    store(request) {
         throw new Error('You have to implement the method store!');
     }
 
-    show() {
+    show(request) {
         throw new Error('You have to implement the method show!');
     }
 
-    update() {
+    update(request) {
         throw new Error('You have to implement the method update!');
     }
 
-    destroy() {
+    destroy(request) {
         throw new Error('You have to implement the method destroy!');
     }
 }

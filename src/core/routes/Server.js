@@ -4,17 +4,15 @@ import * as fs from "fs";
 import FileHandler from "../../helpers/FileHandler.js";
 import env from "../../helpers/env.js";
 import RouteManagement from "./RouteManagement.js";
+import pkg from 'formidable';
 
 export default class Server {
-    constructor(routeManagement = null) {
-        this.#fileHandler = new FileHandler();
-        this.#routeManagement = routeManagement !== null ? routeManagement : (new RouteManagement());
-
+    constructor() {
+        this.#routeManagement = new RouteManagement();
         this.#http = http.createServer(this.#startServer.bind(this));
     }
 
     #http
-    #fileHandler
     #routeManagement
 
     #contentTypesByExtension = {
@@ -34,63 +32,33 @@ export default class Server {
         })
     }
 
-    getView(pathName, cbReturn) {
-        this.#routeManagement.get(pathName, 'HTML', cbReturn);
-    }
-
-    postView(pathName, cbReturn) {
-        this.#routeManagement.post(pathName, 'HTML', cbReturn);
-    }
-
-    putView(pathName, cbReturn) {
-        this.#routeManagement.put(pathName, 'HTML', cbReturn);
-    }
-
-    deleteView(pathName, cbReturn) {
-        this.#routeManagement.delete(pathName, 'HTML', cbReturn);
-    }
-
-    getJson(pathName, cbReturn) {
-        this.#routeManagement.get(pathName, 'JSON', cbReturn);
-    }
-
-    postJson(pathName, cbReturn) {
-        this.#routeManagement.post(pathName, 'JSON', cbReturn);
-    }
-
-    putJson(pathName, cbReturn) {
-        this.#routeManagement.put(pathName, 'JSON', cbReturn);
-    }
-
-    deleteJson(pathName, cbReturn) {
-        this.#routeManagement.delete(pathName, 'JSON', cbReturn);
-    }
-
-    async #startServer(request, response) {
+    async #startServer(req, response) {
         try {
-            const pathName = path.join(process.cwd(), request.url);
+            const { urlPath, fullPath, data } = await this.#handleRequest(req);
+            const { default: Request } = await import('./Request.js');
+            const request = new Request(req, data);
 
-            if (this.#hasExtension(pathName)) {
-                this.#fileHandler.verifyExistAndReadable(pathName)
-                    .then(() => {
-                        fs.readFile(pathName, 'binary', (err, file) => {
-                            this.#handleIfHasError(response, err)
-                                .then(() => {
-                                    response.writeHead(200, { "Content-Type": this.#contentTypesByExtension[path.extname(pathName)] });
-                                    response.write(file, 'binary');
-                                    response.end();
-                                });
-                        })
+            if (FileHandler.hasExtension(fullPath)) {
+                try {
+                    await FileHandler.verifyExistAndReadable(fullPath)
+
+                    fs.readFile(fullPath, 'binary', (err, file) => {
+                        this.#handleIfHasError(response, err)
+                            .then(() => {
+                                response.writeHead(200, { "Content-Type": this.#contentTypesByExtension[path.extname(fullPath)] });
+                                response.write(file, 'binary');
+                                response.end();
+                            });
                     })
-                    .catch( async () => {
-                        await this.#handleNotFound(response);
-                    });
+                } catch (exception) {
+                    await this.#handleNotFound(response);
+                }
             } else {
                 if (this.#routeManagement !== null) {
                     const {
                         headers, content,
                         typeContent, statusCode
-                    } = await this.#routeManagement.runRoute(request.url, request.method);
+                    } = await this.#routeManagement.runRoute(urlPath, request);
 
                     response.writeHead(statusCode, headers);
                     response.write(content, typeContent);
@@ -100,52 +68,80 @@ export default class Server {
                 }
             }
         } catch (error) {
-            this.isJSON(error.message).then(async ({ statusCode, typeContent }) => {
+            try {
+                const { default: JsonHandler } = await import('../../helpers/JsonHandler.js');
+                const { statusCode, typeContent } = await JsonHandler.isStringJSON(error.message);
+
                 if (statusCode === 404) {
                     await this.#handleNotFound(response, typeContent);
                 } else {
                     await this.#handleIfHasError(response, error, false);
                 }
-            }).catch(async () => {
+            } catch (error) {
                 await this.#handleIfHasError(response, error, false);
-            })
+            }
         }
     }
 
-    async isJSON(json) {
-        return JSON.parse(json);
+    async #handleRequest(request) {
+        const [urlPath, queryString] = request.url.split('?');
+
+        const fullPath = path.join(process.cwd(), urlPath);
+
+        const { queryData } = await this.#handleQueryData(queryString || '');
+        const { fields: bodyData } = await this.#handleBodyData(request);
+        const data = Object.assign(queryData, bodyData);
+
+        return { urlPath, fullPath, data };
+    }
+
+    async #handleQueryData(queryString) {
+        const qs = await import('querystring');
+        const queryData = qs.decode(queryString);
+        return { queryData };
+    }
+
+    #handleBodyData(request) {
+        return new Promise(async (resolve, reject) => {
+            const { formidable } = pkg;
+            const form = formidable();
+            form.parse(request, (err, fields, files) => {
+                if (err) {
+                    reject(err);
+                }
+
+                resolve({fields, files});
+            })
+        });
     }
 
     async #handleIfHasError(response, error = null, hasThrow = true) {
-        if (error !== null) {
+        if (error === null) return true;
+
+        try {
             const pathName505 = path.join(process.cwd(), await env('URL_500', '/public/views/500.html'));
-            this.#fileHandler.verifyExistAndReadable(pathName505)
-                .then(() => {
-                    fs.readFile(pathName505, 'binary', (err, file) => {
-                        if (err !== null) {
-                            response.writeHead(500, {"Content-Type": "text/plain"});
-                            response.write(err + "\n");
-                            response.end();
-                        } else {
-                            response.writeHead(500, { "Content-Type": this.#contentTypesByExtension[path.extname(pathName505)] });
-                            response.write(file, 'binary');
-                            response.end();
-                        }
-                    })
-                })
-                .catch(() => {
+            await FileHandler.verifyExistAndReadable(pathName505);
+
+            fs.readFile(pathName505, 'binary', (err, file) => {
+                if (err !== null) {
                     response.writeHead(500, {"Content-Type": "text/plain"});
-                    response.write(error + "\n");
+                    response.write(err + "\n");
                     response.end();
-                });
-
-            if (hasThrow) throw new Error(error);
-            console.error(error);
-
-            return true;
-        } else {
-            return true;
+                } else {
+                    response.writeHead(500, { "Content-Type": this.#contentTypesByExtension[path.extname(pathName505)] });
+                    response.write(file, 'binary');
+                    response.end();
+                }
+            })
+        } catch (exception) {
+            response.writeHead(500, {"Content-Type": "text/plain"});
+            response.write(error + "\n");
+            response.end();
         }
+
+        if (hasThrow) throw new Error(error);
+        console.error(error);
+        return true;
     }
 
     async #handleNotFound(response, typeContent = 'binary') {
@@ -156,40 +152,32 @@ export default class Server {
                 response.end();
                 break;
             case 'binary':
-                const pathName404 = path.join(process.cwd(), await env('URL_404', '/public/views/404.html'));
-                this.#fileHandler.verifyExistAndReadable(pathName404)
-                    .then(() => {
-                        fs.readFile(pathName404, 'binary', (err, file) => {
-                            if (err !== null) {
-                                response.writeHead(500, {"Content-Type": "text/plain"});
-                                response.write(err + "\n");
-                                response.end();
-                            } else {
-                                response.writeHead(404, { "Content-Type": this.#contentTypesByExtension[path.extname(pathName404)] });
-                                response.write(file, 'binary');
-                                response.end();
-                            }
-                        })
+                try {
+                    const pathName404 = path.join(process.cwd(), await env('URL_404', '/public/views/404.html'));
+                    await FileHandler.verifyExistAndReadable(pathName404);
+
+                    fs.readFile(pathName404, 'binary', (err, file) => {
+                        if (err !== null) {
+                            response.writeHead(500, {"Content-Type": "text/plain"});
+                            response.write(err + "\n");
+                            response.end();
+                        } else {
+                            response.writeHead(404, { "Content-Type": this.#contentTypesByExtension[path.extname(pathName404)] });
+                            response.write(file, 'binary');
+                            response.end();
+                        }
                     })
-                    .catch(() => {
-                        response.writeHead(404, { 'Content-Type': 'text/plain' });
-                        response.write("404 Not Found\n");
-                        response.end();
-                    });
+                } catch (exception) {
+                    response.writeHead(404, { 'Content-Type': 'text/plain' });
+                    response.write("404 Not Found\n");
+                    response.end();
+                }
                 break;
             default:
                 response.writeHead(404, { 'Content-Type': 'text/plain' });
                 response.write("404 Not Found\n");
                 response.end();
         }
-    }
-
-    getRouteManagement() {
-        return this.#routeManagement;
-    }
-
-    setRouteManagement(routeManagement) {
-        this.#routeManagement = routeManagement;
     }
 
     concatRoutes(routes) {
@@ -202,7 +190,35 @@ export default class Server {
         return this;
     }
 
-    #hasExtension(filename) {
-        return path.extname(filename).length > 0;
+    getView(pathName, cbReturn) {
+        this.#routeManagement.getView(pathName, cbReturn);
+    }
+
+    postView(pathName, cbReturn) {
+        this.#routeManagement.postView(pathName, cbReturn);
+    }
+
+    putView(pathName, cbReturn) {
+        this.#routeManagement.putView(pathName, cbReturn);
+    }
+
+    deleteView(pathName, cbReturn) {
+        this.#routeManagement.deleteView(pathName, cbReturn);
+    }
+
+    getJson(pathName, cbReturn) {
+        this.#routeManagement.getJson(pathName, cbReturn);
+    }
+
+    postJson(pathName, cbReturn) {
+        this.#routeManagement.postJson(pathName, cbReturn);
+    }
+
+    putJson(pathName, cbReturn) {
+        this.#routeManagement.putJson(pathName, cbReturn);
+    }
+
+    deleteJson(pathName, cbReturn) {
+        this.#routeManagement.deleteJson(pathName, cbReturn);
     }
 }

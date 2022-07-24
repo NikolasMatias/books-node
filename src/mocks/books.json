@@ -1,34 +1,122 @@
 [
   {
     "id": 1,
-    "title": "Harry Potter and the philosopher's stone"
+    "title": "Harry Potter and the philosopher's stone",
+    "imageUrl": "https://m.media-amazon.com/images/M/MV5BMzkyZGFlOWQtZjFlMi00N2YwLWE2OWQtYTgxY2NkNmM1NjMwXkEyXkFqcGdeQXVyNjY1NTM1MzA@._V1_.jpg"
   },
   {
     "id": 2,
-    "title": "Harry Potter and the chamber of secrets"
+    "title": "Harry Potter and the chamber of secrets",
+    "imageUrl": "https://m.media-amazon.com/images/M/MV5BMjE0YjUzNDUtMjc5OS00MTU3LTgxMmUtODhkOThkMzdjNWI4XkEyXkFqcGdeQXVyMTA3MzQ4MTc0._V1_FMjpg_UX1000_.jpg"
   },
   {
     "id": 3,
-    "title": "Harry Potter and the prisoner of azkaban"
+    "title": "Harry Potter and the prisoner of azkaban",
+    "imageUrl": "https://cdn.europosters.eu/image/1300/art-photo/harry-potter-the-prisoner-of-azkaban-i105075.jpg"
   },
   {
     "id": 4,
-    "title": "Harry Potter and the goblet of fire"
+    "title": "Harry Potter and the goblet of fire",
+    "imageUrl": "https://i.scdn.co/image/ab67616d0000b273bb71e7f0768b0b71d93adb8e"
   },
   {
     "id": 5,
-    "title": "Harry Potter and the order of the phoenix"
+    "title": "Harry Potter and the order of the phoenix",
+    "imageUrl": "https://static.wikia.nocookie.net/harrypotter/images/7/70/Harry_Potter_and_the_Order_of_the_Phoenix.jpg/revision/latest?cb=20161002074140"
   },
   {
     "id": 6,
-    "title": "Harry Potter and the prince half blood"
+    "title": "Harry Potter and the prince half blood",
+    "imageUrl": "https://img.betaseries.com/6OlVV8KkPwLVWiZXoMwSHssj8tg=/600x900/smart/https%3A%2F%2Fpictures.betaseries.com%2Ffilms%2Faffiches%2Foriginal%2F371.jpg"
   },
   {
     "id": 7,
-    "title": "Harry Potter and the relics of death"
+    "title": "Harry Potter and the relics of death",
+    "imageUrl": "https://m.media-amazon.com/images/M/MV5BMTQ2OTE1Mjk0N15BMl5BanBnXkFtZTcwODE3MDAwNA@@._V1_FMjpg_UX1000_.jpg"
   },
   {
     "id": 8,
-    "title": "The Hunger Games"
+    "title": "The Hunger Games",
+    "imageUrl": "https://images-na.ssl-images-amazon.com/images/I/614SwlZNtJL.jpg"
+  },
+  {
+    "id": 9,
+    "title": "The Hunger Games - Catching Fire",
+    "imageUrl": "https://kbimages1-a.akamaihd.net/f2aa88e7-a1b1-413c-a3db-4b348da4282e/353/569/90/False/catching-fire-hunger-games-book-two.jpg"
+  },
+  {
+    "id": 10,
+    "title": "The Hunger Games - Mockingjay",
+    "imageUrl": "https://m.media-amazon.com/images/I/51zkheo7x8L.jpg"
+  },
+  {
+    "id": 11,
+    "title": "The Spook's Apprentice",
+    "imageUrl": "https://m.media-amazon.com/images/I/51WQbsXouTL.jpg"
+  },
+  {
+    "id":  12,
+    "title":  "The Spook's Curse",
+    "imageUrl":  "https://m.media-amazon.com/images/I/517AW3pariL.jpg"
+  },
+  {
+    "id":  13,
+    "title":  "The Spook's Secret",
+    "imageUrl":  "https://m.media-amazon.com/images/I/51kdIZ4jFaL.jpg"
+  },
+  {
+    "id":  14,
+    "title":  "The Spook's Battle",
+    "imageUrl":  "https://images-na.ssl-images-amazon.com/images/I/9130yxuDXgL.jpg"
+  },
+  {
+    "id":  15,
+    "title":  "The Spook's Mistake",
+    "imageUrl":  "https://m.media-amazon.com/images/I/4198aJcaJ2L.jpg"
+  },
+  {
+    "id":  16,
+    "title":  "The Spook's Sacrifice",
+    "imageUrl":  "https://m.media-amazon.com/images/I/51wnVcbcFeL.jpg"
+  },
+  {
+    "id":  17,
+    "title":  "The Spook's Nightmare",
+    "imageUrl":  "https://m.media-amazon.com/images/I/51PaPonAyoL.jpg"
+  },
+  {
+    "id":  18,
+    "title":  "The Spook's Destiny",
+    "imageUrl":  "https://m.media-amazon.com/images/I/41G3++r+GZL.jpg"
+  },
+  {
+    "id":  19,
+    "title":  "Spook's: I Am Grimalkin",
+    "imageUrl":  "https://i.pinimg.com/originals/49/9e/c5/499ec59dd79a8b4968a4043bdd4851e8.jpg"
+  },
+  {
+    "id":  20,
+    "title":  "The Spook's Blood",
+    "imageUrl":  "https://images-submarino.b2w.io/produtos/01/00/item/122815/8/122815865_1GG.jpg"
+  },
+  {
+    "id":  21,
+    "title":  "Spook's: Slither's Tale",
+    "imageUrl":  "https://m.media-amazon.com/images/I/51uDiAb64bL.jpg"
+  },
+  {
+    "id":  22,
+    "title":  "Spook's: Alice",
+    "imageUrl":  "https://images-na.ssl-images-amazon.com/images/I/911VmFOggcL.jpg"
+  },
+  {
+    "id":  23,
+    "title":  "The Spook's Revenge",
+    "imageUrl":  "https://m.media-amazon.com/images/I/41HUBz8seoL.jpg"
+  },
+  {
+    "id": 24,
+    "title": "Alice in Wonderland",
+    "imageUrl": "https://cf.shopee.com.br/file/988eef4cfb53ac9efee5c1aaa9802f15"
   }
 ]

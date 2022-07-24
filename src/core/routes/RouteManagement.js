@@ -3,15 +3,14 @@ import FileHandler from "../../helpers/FileHandler.js";
 import Route from "./data/Route.js";
 import * as path from "path";
 import AbstractController from "../controllers/AbstractController.js";
+import Request from './Request.js'
 
 export default class RouteManagement {
     #routes
-    #fileHeader
     constants
 
     constructor() {
         this.#routes = [];
-        this.#fileHeader = new FileHandler();
 
         this.constants = {
             HTML: 'text/html',
@@ -107,18 +106,20 @@ export default class RouteManagement {
         this.deleteJson(`${pathName}/{id}`, controller.destroy);
     }
 
-    async runRoute(pathName, method) {
+    async runRoute(pathName, request) {
         try {
+            if (! request instanceof Request) throw new Error('request need to be an instance of Request');
+            const {  method } = request.originalRequest;
             const route = this.getRoute(pathName, method);
 
             const returnCallback = route.getCallback();
-            const returnValue = returnCallback();
+            const returnValue = returnCallback(request);
             const headers = { 'Content-Type':  route.getHeader('Content-Type')};
 
             if (route.getHeader('Content-Type').includes(this.constants.HTML)) {
                 const fullPath = path.join(process.cwd(), returnValue);
                 const typeContent = 'binary';
-                await this.#fileHeader.verifyExistAndReadable(fullPath);
+                await FileHandler.verifyExistAndReadable(fullPath);
 
                 const content = await fs.promises.readFile(fullPath, typeContent);
                 const statusCode = 200;
@@ -184,5 +185,7 @@ export default class RouteManagement {
         }
 
         this.#routes = this.#routes.concat(routes.getRoutes());
+
+        return this;
     }
 }
