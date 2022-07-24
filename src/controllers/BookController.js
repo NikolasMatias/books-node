@@ -1,5 +1,5 @@
 import AbstractController from "../core/controllers/AbstractController.js";
-import books from '../mocks/books.json';
+import books from '../mocks/books.json' assert {type: "json"};
 
 export default class BookController extends AbstractController
 {
