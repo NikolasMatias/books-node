@@ -2,6 +2,7 @@ import fs from 'fs';
 import FileHandler from "../../helpers/FileHandler.js";
 import Route from "./data/Route.js";
 import * as path from "path";
+import AbstractController from "../controllers/AbstractController.js";
 
 export default class RouteManagement {
     #routes
@@ -70,6 +71,16 @@ export default class RouteManagement {
         this.delete(pathName, 'HTML', cbReturn);
     }
 
+    viewResource(pathName, controller) {
+        if (! controller instanceof AbstractController) throw new Error('Second Parameter needs to be an instance of AbstractController');
+
+        this.getView(pathName, controller.index);
+        this.postView(pathName, controller.store);
+        this.getView(`${pathName}/{id}`, controller.show);
+        this.putView(`${pathName}/{id}`, controller.update);
+        this.deleteView(`${pathName}/{id}`, controller.destroy);
+    }
+
     getJson(pathName, cbReturn) {
         this.get(pathName, 'JSON', cbReturn);
     }
@@ -84,6 +95,16 @@ export default class RouteManagement {
 
     deleteJson(pathName, cbReturn) {
         this.delete(pathName, 'JSON', cbReturn);
+    }
+
+    apiResource(pathName, controller) {
+        if (! controller instanceof AbstractController) throw new Error('Second Parameter needs to be an instance of AbstractController');
+
+        this.getJson(pathName, controller.index);
+        this.postJson(pathName, controller.store);
+        this.getJson(`${pathName}/{id}`, controller.show);
+        this.putJson(`${pathName}/{id}`, controller.update);
+        this.deleteJson(`${pathName}/{id}`, controller.destroy);
     }
 
     async runRoute(pathName, method) {
