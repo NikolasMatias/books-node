@@ -11,7 +11,7 @@ export default class BookController extends AbstractController
         const search = request.get('search');
 
         if (search) {
-            return books.filter(book => book.title.includes(search));
+            return books.filter(book => book.title.toLowerCase().includes(search.toLowerCase()));
         }
 
         return books;

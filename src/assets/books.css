@@ -1,0 +1,78 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Alef, sans-serif;
+    height: auto;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    width: 90vw;
+    min-height: 100vh;
+    padding-inline: 2rem;
+    margin-inline: auto;
+    background-color: rgba(224, 218, 226, 1);
+}
+
+.container > .title {
+    font-size: 1.5rem;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.container > .title > label > input {
+    font-size: 1rem;
+    height: 1rem;
+    margin-top: 2rem;
+}
+
+.list-of-books {
+    display: grid;
+    overflow: hidden;
+    margin-inline: auto;
+    grid-template-columns: repeat(7, 10vw);
+    grid-auto-rows: 1fr;
+    grid-column-gap: 1rem;
+    grid-row-gap: 2rem;
+    max-width: 90vw;
+}
+
+.book {
+    display: flex;
+    flex-direction: column;
+    width: 10vw;
+    height: 40vh;
+    margin-right: 10px;
+    margin-left: 10px;
+    margin-top: 10px;
+
+}
+
+.book > .book-title {
+    flex-basis: 30%;
+    text-align: center;
+    height: auto;
+    word-break: break-all;
+    align-self: stretch;
+}
+
+.book > .book-image {
+    flex-basis: 70%;
+    height: 28vw;
+}
+
+.book-image > img {
+    width: 10vw;
+    height: auto;
+}
+
+.message-error {
+    width: 100%;
+}
+
+.empty-list {
+    width: 100%;
+    text-align: center;
+}
