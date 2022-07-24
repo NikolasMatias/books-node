@@ -16,8 +16,4 @@ export default class BookController extends AbstractController
 
         return books;
     }
-
-    store(request) {
-        return request.get('autor');
-    }
 }
