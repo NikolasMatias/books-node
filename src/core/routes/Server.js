@@ -23,7 +23,7 @@ export default class Server {
 
     async listen(callback) {
         const hostname = await env('HTTP_HOST', '127.0.0.1');
-        const port = await env('HTTP_PORT', '3000');
+        const port = await env('HTTP_PORT', '80');
 
         return this.#http.listen(port, hostname, () => {
             console.log(`Server running at http://${hostname}:${port}/`);
