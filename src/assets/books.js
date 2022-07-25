@@ -1,6 +1,9 @@
 let controller = new AbortController();
 let booksPromise = null;
 let booksTimeout = null;
+let books = [];
+
+getBooks(null);
 
 async function getBooks(search) {
     let url = '/api/books';
@@ -11,27 +14,16 @@ async function getBooks(search) {
     }
 
     booksPromise = fetch(url, {signal: controller.signal}).then(response => response.json());
-    const books = await booksPromise;
-    createDivBooks(books);
+    books = await booksPromise;
+    createDivBooks();
 }
 
-function createDivBooks(books) {
+function createDivBooks() {
     const listOfBooks = document.querySelector('.list-of-books');
-    const messageError = document.querySelector('.message-error');
 
     listOfBooks.innerHTML = ''
 
-    if (books.length === 0) {
-        messageError.innerHTML = '';
-        const messageDiv = document.createElement('div');
-        const messageText = document.createElement('h3');
-        messageDiv.classList.add('empty-list');
-        messageText.innerHTML = "There's no book by the search given";
-        messageDiv.appendChild(messageText);
-        messageError.appendChild(messageDiv);
-    } else {
-        messageError.innerHTML = '';
-    }
+    handleMessages();
 
     for (const book of books) {
         const bookDiv = document.createElement('div');
@@ -57,12 +49,31 @@ function createDivBooks(books) {
     booksPromise = null;
 }
 
-getBooks(null);
+function handleMessages() {
+    const messages = document.querySelector('.messages');
+
+    messages.innerHTML = '';
+    const messageDiv = document.createElement('div');
+    const messageText = document.createElement('h3');
+    messageDiv.classList.add('empty-list');
+    messageDiv.appendChild(messageText);
+    messages.appendChild(messageDiv);
+
+    if (books.length === 0) messageText.innerHTML = "There's no book by the search given";
+
+    if (booksTimeout !== null) messageText.innerHTML = "Loading books...";
+
+    if (books.length > 0) messages.innerHTML = '';
+}
 
 function handleSearch(event) {
     const search = event.currentTarget.value;
     if (booksTimeout !== null) clearTimeout(booksTimeout);
 
-    booksTimeout = setTimeout(() => getBooks(search), 500);
-}
+    booksTimeout = setTimeout(() => {
+        getBooks(search)
+        booksTimeout = null;
+    }, 500);
 
+    handleMessages();
+}
