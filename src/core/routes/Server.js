@@ -181,10 +181,6 @@ export default class Server {
     }
 
     concatRoutes(routes) {
-        if (typeof routes === 'function') {
-            routes = routes.call();
-        }
-
         this.#routeManagement.concatRoutes(routes);
 
         return this;

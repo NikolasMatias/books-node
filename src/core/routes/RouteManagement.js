@@ -179,13 +179,37 @@ export default class RouteManagement {
         this.#routes = routes;
     }
 
+    concatArrayRoutes(arrayRoutes) {
+        if (Array.isArray(arrayRoutes)) {
+            for (let routes of arrayRoutes) {
+                if (typeof routes === 'function')
+                    routes = routes.call();
+
+                if (routes instanceof RouteManagement) {
+                    this.#routes = this.#routes.concat(routes.getRoutes());
+                } else {
+                    throw new Error('Routes needs to be an instance of RouteManagment');
+                }
+            }
+        } else {
+            throw new Error('arrayRoutes needs to be an Array with instances of RouteManagment');
+        }
+    }
+
     concatRoutes(routes) {
-        if (typeof routes === 'function') {
+        if (typeof routes === 'function')
             routes = routes.call();
+
+        if (Array.isArray(routes)) {
+            this.concatArrayRoutes(routes);
+            return this;
         }
 
-        this.#routes = this.#routes.concat(routes.getRoutes());
+        if (routes instanceof RouteManagement) {
+            this.#routes = this.#routes.concat(routes.getRoutes());
+            return this;
+        }
 
-        return this;
+        throw new Error('Routes needs to be an instance of RouteManagment or an Array with instances of RouteManagment');
     }
 }
